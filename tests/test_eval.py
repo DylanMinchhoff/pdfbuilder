@@ -1,6 +1,33 @@
+from collections.abc import Sequence
 import pytest
-from kernel import Expression, Int, Add, Subtract, Multiply, Let, Var
-from eval import Value, Environment, eval_expr
+from kernel import Program, Expression, Int, Add, Subtract, Multiply, Let, Var
+from eval import Value, Environment, eval, eval_expr
+
+
+@pytest.mark.parametrize(
+    "program, arguments, expected",
+    list[tuple[Program, Sequence[Value], Value]](
+        [
+            # Int
+            (
+                Program([], Int(0)),
+                [],
+                0,
+            ),
+            (
+                Program(["x"], Var("x")),
+                [0],
+                0,
+            ),
+        ]
+    ),
+)
+def test_eval(
+    program: Program,
+    arguments: Sequence[Value],
+    expected: Value,
+) -> None:
+    assert eval(program, arguments) == expected
 
 
 @pytest.mark.parametrize(
@@ -46,9 +73,9 @@ from eval import Value, Environment, eval_expr
         ]
     ),
 )
-def test_eval(
+def test_eval_expr(
     expr: Expression,
     env: Environment,
-    expected: int,
+    expected: Value,
 ) -> None:
     assert eval_expr(expr, env) == expected

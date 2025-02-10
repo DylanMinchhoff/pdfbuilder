@@ -43,3 +43,9 @@ class Let:
 @dataclass(frozen=True)
 class Var:
     name: str
+
+
+@dataclass(frozen=True)
+class Program:
+    parameters: Sequence[str]
+    body: Expression
