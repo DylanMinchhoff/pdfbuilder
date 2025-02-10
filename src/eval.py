@@ -25,7 +25,12 @@ def eval_expr(
             return recur(e1) * recur(e2)
 
         case Let(x, e1, e2):
-            raise NotImplementedError()
+            # create a new varible x and assign it to e1
+            # then copy envirnment vars and new var in scope and eval
+            return recur(e2, env={**env, x: recur(e1)})
 
-        case Var(x):
-            raise NotImplementedError()
+        case Var(x):  # pragma: no branch
+            if x in env:  # varible has been declared and using
+                return env[x]
+            else:
+                return Int(0)
