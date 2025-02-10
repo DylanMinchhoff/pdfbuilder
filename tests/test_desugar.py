@@ -1,7 +1,25 @@
 import pytest
 import sugar
 import kernel
-from desugar import desugar_expr
+from desugar import desugar, desugar_expr
+
+
+@pytest.mark.parametrize(
+    "program, expected",
+    list[tuple[sugar.Program, kernel.Program]](
+        [
+            (
+                sugar.Program([], sugar.Int(0)),
+                kernel.Program([], kernel.Int(0)),
+            ),
+        ]
+    ),
+)
+def test_desugar(
+    program: sugar.Program,
+    expected: kernel.Expression,
+) -> None:
+    assert desugar(program) == expected
 
 
 @pytest.mark.parametrize(

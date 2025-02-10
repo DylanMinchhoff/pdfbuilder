@@ -1,9 +1,17 @@
-from collections.abc import Mapping
+from collections.abc import Sequence, Mapping
 from functools import partial
-from kernel import Expression, Int, Add, Subtract, Multiply, Let, Var
+from kernel import Program, Expression, Int, Add, Subtract, Multiply, Let, Var
 
 type Value = int
 type Environment = Mapping[str, Value]
+
+
+def eval(
+    program: Program,
+    arguments: Sequence[Value],
+) -> Value:
+    env: Environment = {}
+    return eval_expr(program.body, env)
 
 
 def eval_expr(
@@ -32,5 +40,3 @@ def eval_expr(
         case Var(x):  # pragma: no branch
             if x in env:  # varible has been declared and using
                 return env[x]
-            else:
-                return Int(0)

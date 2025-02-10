@@ -1,3 +1,4 @@
+from collections.abc import Sequence
 from dataclasses import dataclass
 from typing import Union
 
@@ -45,3 +46,9 @@ class Let:
 @dataclass(frozen=True)
 class Var:
     name: str
+
+
+@dataclass(frozen=True)
+class Program:
+    parameters: Sequence[str]
+    body: Expression

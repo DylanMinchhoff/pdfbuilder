@@ -14,7 +14,7 @@ from parse_kernel import parse_expr
         ]
     ),
 )
-def test_parse_expr_expr_int(
+def test_parse_expr_int(
     source: str,
     expected: Expression,
 ) -> None:

@@ -1,6 +1,24 @@
 import pytest
-from kernel import Expression, Int, Add, Subtract, Multiply, Let, Var
-from opt import opt_expr
+from kernel import Program, Expression, Int, Add, Subtract, Multiply, Let, Var
+from opt import opt, opt_expr
+
+
+@pytest.mark.parametrize(
+    "program, expected",
+    list[tuple[Program, Program]](
+        [
+            (
+                Program([], Int(0)),
+                Program([], Int(0)),
+            ),
+        ]
+    ),
+)
+def test_opt(
+    program: Program,
+    expected: Program,
+) -> None:
+    assert opt(program) == expected
 
 
 @pytest.mark.parametrize(

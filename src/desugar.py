@@ -3,6 +3,15 @@ import sugar
 import kernel
 
 
+def desugar(
+    program: sugar.Program,
+) -> kernel.Program:
+    return kernel.Program(
+        parameters=program.parameters,
+        body=desugar_expr(program.body),
+    )
+
+
 def desugar_expr(
     expr: sugar.Expression,
 ) -> kernel.Expression:
