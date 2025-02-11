@@ -32,8 +32,6 @@ def desugar_expr(
 
         case sugar.Subtract(operands):
             match operands:
-                case []:
-                    return kernel.Int(0)
                 case [ex]:
                     return kernel.Subtract(kernel.Int(0), recur(ex))
                 case [ex1, ex2]:
