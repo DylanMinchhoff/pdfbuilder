@@ -64,5 +64,20 @@ def desugar_expr(
         case Var():
             return expr
 
+        case Bool():
+            return expr
+
+        case If(cond, con, alt):
+            return If(cond, con, alt)
+
+        case LessThan(a, b):
+            return LessThan(a, b)
+
+        case GreaterThanOrEqualTo(a, b):
+            return GreaterThanOrEqualTo(a, b)
+
+        case EqualTo(a, b):
+            return EqualTo(a, b)
+
         case _:
             raise NotImplementedError()

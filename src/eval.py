@@ -66,5 +66,20 @@ def eval_expr(
         case Var(x):
             return env[x]
 
+        case Bool(val):
+            return Bool(val)
+
+        case If(cond, con, alt):
+            return con if (recur(cond).value == True) else alt
+
+        case LessThan(a, b):
+            return Bool(value=True) if a.value < b.value else Bool(value=False)
+
+        case GreaterThanOrEqualTo(a, b):
+            return Bool(value=True) if a.value >= b.value else Bool(value=False)
+
+        case EqualTo(a, b):
+            return Bool(value=True) if a == b else Bool(value=False)
+
         case _:
             raise NotImplementedError()
