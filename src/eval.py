@@ -43,7 +43,7 @@ def eval_expr(
             match recur(e1), recur(e2):
                 case [Int(i1), Int(i2)]:
                     return Int(i1 + i2)
-                case _:  # pragma: no cover
+                case [_, _]:  # pragma: no cover
                     raise ValueError()
 
         case Subtract(e1, e2):
