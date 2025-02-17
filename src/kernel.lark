@@ -1,19 +1,29 @@
-expr: nat                                                           -> int_expr
+program: "(" "program" ")"
+expr: int                                                           -> int_expr
     | "(" "+" expr expr ")"                                         -> add_expr
     | "(" "-" expr expr ")"                                         -> subtract_expr
-    | "(" "*" expr expr ")"                                         -> multiply_expr    
+    | "(" "*" expr expr ")"                                         -> multiply_expr
     | "(" "let" "(" "[" identifier expr "]" ")" expr ")"            -> let_expr
     | identifier                                                    -> var_expr
+    | (true | false)                                                -> bool_expr
+    | "(" "if" expr expr expr ")"                                   -> if_expr
+    | "(" "<" expr expr ")"                                         -> less_than_expr
+    | "(" "==" expr expr ")"                                        -> equal_to_expr
+    | "(" ">=" expr expr ")"                                        -> greater_than_or_equal_to_expr
 
-nat: NAT
+int: INT
+true: TRUE
+false: FALSE
 identifier: IDENTIFIER
 
-NAT:    "1".."9"        ("_"?  "0".."9")*
-    |   "0"             ("_"?  "0"     )* /(?![1-9])/   
+INT: ("0".."9")+
+
+TRUE: "#t"
+FALSE: "#f"
 
 IDENTIFIER: /[^\W\d]\w*/
 
-%import common.WS
+WS: /[ \t\f\r\n]/+
 
 %ignore WS
 
