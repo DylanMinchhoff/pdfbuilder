@@ -1,6 +1,34 @@
 from functools import partial
 import sugar
+from sugar import (
+    Sum,
+    Difference,
+    Product,
+    LetStar,
+    Cond,
+    Not,
+    All,
+    Any,
+    NonAscending,
+    Descending,
+    Same,
+    Ascending,
+    NonDescending,
+)
 import kernel
+from kernel import (
+    Int,
+    Add,
+    Subtract,
+    Multiply,
+    Let,
+    Var,
+    Bool,
+    If,
+    LessThan,
+    EqualTo,
+    GreaterThanOrEqualTo,
+)
 
 
 def desugar(
@@ -18,40 +46,23 @@ def desugar_expr(
     recur = partial(desugar_expr)
 
     match expr:
-        case sugar.Int(i):
-            return kernel.Int(i)
+        case Int():
+            return expr
 
-        case sugar.Add(es):
-            match es:
-                case []:
-                    return kernel.Int(0)
-                case [first, *rest]:
-                    return kernel.Add(recur(first), recur(sugar.Add(rest)))
-                case _:  # pragma: no cover
-                    raise NotImplementedError()
+        case Add(e1, e2):
+            return Add(recur(e1), recur(e2))
 
-        case sugar.Subtract(operands):
-            match operands:
-                case [ex]:
-                    return kernel.Subtract(kernel.Int(0), recur(ex))
-                case [ex1, ex2]:
-                    return kernel.Subtract(recur(ex1), recur(ex2))
-                case [first, *rest]:
-                    return kernel.Subtract(recur(first), recur(sugar.Subtract(rest)))
-                case _:  # pragma: no cover
-                    raise NotImplementedError()
+        case Subtract(e1, e2):
+            return Subtract(recur(e1), recur(e2))
 
-        case sugar.Multiply(operands):
-            match operands:
-                case []:
-                    return kernel.Int(1)
-                case [first, *rest]:
-                    return kernel.Multiply(recur(first), recur(sugar.Multiply(rest)))
-                case _:  # pragma: no cover
-                    raise NotImplementedError()
+        case Multiply(e1, e2):
+            return Multiply(recur(e1), recur(e2))
 
-        case sugar.Let(x, e1, e2):
-            return kernel.Let(x, recur(e1), recur(e2))
+        case Let(x, e1, e2):
+            return Let(x, recur(e1), recur(e2))
 
-        case sugar.Var(x):  # pragma: no branch
-            return kernel.Var(x)
+        case Var():
+            return expr
+
+        case _:
+            raise NotImplementedError()
