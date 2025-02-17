@@ -37,7 +37,7 @@ def test_opt(
 
 @pytest.mark.parametrize(
     "expr, expected",
-    list[tuple[Int, Expression]](
+    list[tuple[Expression, Expression]](
         [
             (
                 Int(0),
@@ -47,7 +47,7 @@ def test_opt(
     ),
 )
 def test_opt_expr_int(
-    expr: Int,
+    expr: Expression,
     expected: Expression,
 ) -> None:
     assert opt_expr(expr) == expected
