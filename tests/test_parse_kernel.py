@@ -1,5 +1,6 @@
 import pytest
 from kernel import (
+    Program,
     Expression,
     Int,
     Add,
@@ -13,7 +14,25 @@ from kernel import (
     EqualTo,
     GreaterThanOrEqualTo,
 )
-from parse_kernel import parse_expr
+from parse_kernel import parse, parse_expr
+
+
+@pytest.mark.parametrize(
+    "source, expected",
+    list[tuple[str, Program]](
+        [
+            (
+                "(program (x) 0)",
+                Program(["x"], Int(0)),
+            ),
+        ]
+    ),
+)
+def test_parse(
+    source: str,
+    expected: Program,
+) -> None:
+    assert parse(source) == expected
 
 
 @pytest.mark.parametrize(
