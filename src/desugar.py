@@ -49,6 +49,57 @@ def desugar_expr(
         case Int():
             return expr
 
+        case Sum([*vals]):
+            match [*vals]:
+                case []:
+                    return Int(0)
+                case [Int(a), *rest]:
+                    return Add(Int(a), recur(Sum([*rest])))
+
+        case Difference([*vals]):
+            match [*vals]:
+                case []:
+                    return Int(0)
+                case [Int(a)]:
+                    return Subtract(Int(0), Int(a))
+                case [Int(a), Int(b)]:
+                    return Subtract(Int(a), Int(b))
+                case [Int(a), *rest]:
+                    return Subtract(Int(a), recur(Difference([*rest])))
+
+        case Product([*vals]):
+            match [*vals]:
+                case []:
+                    return Int(1)
+                case [Int(a), *rest]:
+                    return Multiply(Int(a), recur(Product([*rest])))
+
+        case LetStar([*lets], body):
+            match [*lets]:
+                case []:
+                    return body
+                case [[n, e]]:
+                    return Let(n, e, body)
+                case [[n, e], *rest]:
+                    return Let(n, e, recur(LetStar([*rest], body)))
+
+        case Not(a):
+            return If(EqualTo(a, Bool(True)), Bool(False), Bool(True))
+
+        case All([*op]):
+            match [*op]:
+                case []:
+                    return Bool(True)
+                case [a, *rest]:
+                    return If(a, recur(All([*rest])), Bool(True))
+
+        case Any([*op]):
+            match [*op]:
+                case []:
+                    return Bool(False)
+                case [a, *rest]:
+                    return If(a, Bool(True), recur(Any[*rest]))
+
         case Add(e1, e2):
             return Add(recur(e1), recur(e2))
 
