@@ -163,7 +163,6 @@ def test_eval_expr_var(
     assert eval_expr(expr, env) == expected
 
 
-@pytest.mark.xfail
 @pytest.mark.parametrize(
     "expr, env, expected",
     list[tuple[Bool, Environment, Value]](
@@ -189,7 +188,6 @@ def test_eval_expr_bool(
     assert eval_expr(expr, env) == expected
 
 
-@pytest.mark.xfail
 @pytest.mark.parametrize(
     "expr, env, expected",
     list[tuple[Expression, Environment, Value]](
@@ -215,7 +213,6 @@ def test_eval_expr_if(
     assert eval_expr(expr, env) == expected
 
 
-@pytest.mark.xfail
 @pytest.mark.parametrize(
     "expr, env, expected",
     list[tuple[Expression, Environment, Value]](
@@ -236,7 +233,6 @@ def test_eval_expr_less_than(
     assert eval_expr(expr, env) == expected
 
 
-@pytest.mark.xfail
 @pytest.mark.parametrize(
     "expr, env, expected",
     list[tuple[Expression, Environment, Value]](
@@ -262,7 +258,6 @@ def test_eval_expr_equal_to(
     assert eval_expr(expr, env) == expected
 
 
-@pytest.mark.xfail
 @pytest.mark.parametrize(
     "expr, env, expected",
     list[tuple[Expression, Environment, Value]](

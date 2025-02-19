@@ -91,5 +91,46 @@ def opt_expr(
         case Var():
             return expr
 
+        case Bool(value):
+            return Bool(value)
+
+        case If(a, b, c):
+            resA = recur(a)
+            if resA == Bool(True):
+                return b
+            elif resA == Bool(False):
+                return c
+            else:
+                return If(a, b, c)
+
+        case LessThan(a, b):
+            resA = recur(a)
+            resB = recur(b)
+            match [resA, resB]:
+                case [Int(a), Int(b)]:
+                    return Bool(a < b)
+                case _:
+                    return LessThan(a, b)
+
+        case GreaterThanOrEqualTo(a, b):
+            resA = recur(a)
+            resB = recur(b)
+            match [resA, resB]:
+                case [Int(a), Int(b)]:
+                    return Bool(a >= b)
+                case _:
+                    return GreaterThanOrEqualTo(a, b)
+
+        case EqualTo(a, b):
+            resA = recur(a)
+            resB = recur(b)
+            match [resA, resB]:
+                case [Int(a), Int(b)]:
+                    return Bool(a == b)
+                case [Bool(a), Bool(b)]:
+                    return Bool(a == b)
+                case _:
+                    return EqualTo(a, b)
+
         case _:
             raise NotImplementedError()

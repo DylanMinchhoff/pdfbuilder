@@ -43,7 +43,7 @@ def eval_expr(
             match recur(e1), recur(e2):
                 case [Int(i1), Int(i2)]:
                     return Int(i1 + i2)
-                case _:  # pragma: no cover
+                case [_, _]:  # pragma: no cover
                     raise ValueError()
 
         case Subtract(e1, e2):
@@ -65,6 +65,21 @@ def eval_expr(
 
         case Var(x):
             return env[x]
+
+        case Bool(val):
+            return Bool(val)
+
+        case If(cond, con, alt):
+            return con if (recur(cond).value == True) else alt
+
+        case LessThan(a, b):
+            return Bool(value=True) if a.value < b.value else Bool(value=False)
+
+        case GreaterThanOrEqualTo(a, b):
+            return Bool(value=True) if a.value >= b.value else Bool(value=False)
+
+        case EqualTo(a, b):
+            return Bool(value=True) if a == b else Bool(value=False)
 
         case _:
             raise NotImplementedError()

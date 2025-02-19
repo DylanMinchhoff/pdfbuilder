@@ -1,4 +1,6 @@
+from collections.abc import Sequence
 import os
+from typing import Any
 from lark import (
     Lark,
     ParseTree,
@@ -7,6 +9,7 @@ from lark import (
     v_args,  # type: ignore
 )
 from kernel import (
+    Program,
     Expression,
     Int,
     Add,
@@ -23,7 +26,21 @@ from kernel import (
 
 
 @v_args(inline=True)
-class AstTransformer(Transformer[Token, Expression]):
+class AstTransformer(Transformer[Token, Any]):
+    def program(
+        self,
+        parameters: Sequence[str],
+        body: Expression,
+    ) -> Program:
+        return Program(parameters, body)
+
+    @v_args(inline=False)
+    def parameters(
+        self,
+        parameters: Sequence[str],
+    ) -> Sequence[str]:
+        return parameters
+
     def int_expr(
         self,
         value: int,
@@ -81,24 +98,24 @@ class AstTransformer(Transformer[Token, Expression]):
 
     def less_than_expr(
         self,
-        e1: Expression,
-        e2: Expression,
+        x: Expression,
+        y: Expression,
     ) -> LessThan[Expression]:
-        return LessThan(e1, e2)
+        return LessThan(x, y)
 
     def equal_to_expr(
         self,
-        e1: Expression,
-        e2: Expression,
+        x: Expression,
+        y: Expression,
     ) -> EqualTo[Expression]:
-        return EqualTo(e1, e2)
+        return EqualTo(x, y)
 
     def greater_than_or_equal_to_expr(
         self,
-        e1: Expression,
-        e2: Expression,
+        x: Expression,
+        y: Expression,
     ) -> GreaterThanOrEqualTo[Expression]:
-        return GreaterThanOrEqualTo(e1, e2)
+        return GreaterThanOrEqualTo(x, y)
 
     def int(
         self,
@@ -126,6 +143,15 @@ class AstTransformer(Transformer[Token, Expression]):
 
 
 __location__ = os.path.realpath(os.path.join(os.getcwd(), os.path.dirname(__file__)))
+
+
+def parse(
+    source: str,
+) -> Program:
+    with open(os.path.join(__location__, "./kernel.lark"), "r") as f:
+        parser = Lark(f, start="program")
+        tree: ParseTree = parser.parse(source)
+        return AstTransformer().transform(tree)  # type: ignore
 
 
 def parse_expr(

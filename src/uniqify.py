@@ -58,5 +58,20 @@ def uniqify_expr(
         case Var(x):
             return Var(env[x])
 
+        case Bool(value):
+            return Bool(value)
+
+        case If(a, b, c):
+            return If(recur(a), recur(b), recur(c))
+
+        case EqualTo(a, b):
+            return EqualTo(recur(a), recur(b))
+
+        case LessThan(a, b):
+            return LessThan(recur(a), recur(b))
+
+        case GreaterThanOrEqualTo(a, b):
+            return GreaterThanOrEqualTo(recur(a), recur(b))
+
         case _:
             raise NotImplementedError()
