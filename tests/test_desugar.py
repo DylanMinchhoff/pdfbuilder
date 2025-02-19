@@ -384,11 +384,11 @@ def test_desugar_expr_not(
             ),
             (
                 All([Bool(True)]),
-                If(Bool(True), Bool(True), Bool(True)),
+                If(Bool(True), Bool(True), Bool(False)),
             ),
             (
                 All([Bool(True), Bool(False)]),
-                If(Bool(True), If(Bool(False), Bool(True), Bool(True)), Bool(True)),
+                If(Bool(True), If(Bool(False), Bool(True), Bool(False)), Bool(False)),
             ),
         ]
     ),
@@ -397,6 +397,7 @@ def test_desugar_expr_all(
     expr: sugar.Expression,
     expected: kernel.Expression,
 ) -> None:
+    print(desugar_expr(expr))
     assert desugar_expr(expr) == expected
 
 
@@ -466,11 +467,7 @@ def test_desugar_expr_cond(
             ),
             (
                 NonDescending([Int(1), Int(2), Int(3)]),
-                If(
-                    GreaterThanOrEqualTo(Int(2), Int(1)),
-                    If(GreaterThanOrEqualTo(Int(3), Int(2)), Bool(True), Bool(False)),
-                    Bool(True),
-                ),
+                If(GreaterThanOrEqualTo(Int(2), Int(1)), GreaterThanOrEqualTo(Int(3), Int(2)), Bool(False)),
             ),
         ]
     ),
@@ -500,11 +497,7 @@ def test_desugar_expr_non_descending(
             ),
             (
                 Ascending([Int(1), Int(2), Int(3)]),
-                If(
-                    LessThan(Int(1), Int(2)),
-                    If(LessThan(Int(2), Int(3)), Bool(True), Bool(False)),
-                    Bool(True),
-                ),
+                If(LessThan(Int(1), Int(2)), LessThan(Int(2), Int(3)), Bool(False)),
             ),
         ]
     ),
@@ -534,11 +527,7 @@ def test_desugar_expr_ascending(
             ),
             (
                 Same([Int(1), Int(2), Int(3)]),
-                If(
-                    EqualTo(Int(1), Int(2)),
-                    If(EqualTo(Int(2), Int(3)), Bool(True), Bool(False)),
-                    Bool(True),
-                ),
+                If(EqualTo(Int(1), Int(2)), EqualTo(Int(2), Int(3)), Bool(False)),
             ),
         ]
     ),
@@ -568,11 +557,7 @@ def test_desugar_expr_same(
             ),
             (
                 Descending([Int(1), Int(2), Int(3)]),
-                If(
-                    LessThan(Int(2), Int(1)),
-                    If(LessThan(Int(3), Int(2)), Bool(True), Bool(False)),
-                    Bool(True),
-                ),
+                If(LessThan(Int(2), Int(1)), LessThan(Int(3), Int(2)), Bool(False)),
             ),
         ]
     ),
@@ -602,11 +587,7 @@ def test_desugar_expr_descending(
             ),
             (
                 NonAscending([Int(1), Int(2), Int(3)]),
-                If(
-                    GreaterThanOrEqualTo(Int(1), Int(2)),
-                    If(GreaterThanOrEqualTo(Int(2), Int(3)), Bool(True), Bool(False)),
-                    Bool(True),
-                ),
+                If(GreaterThanOrEqualTo(Int(1), Int(2)), GreaterThanOrEqualTo(Int(2), Int(3)), Bool(False)),
             ),
         ]
     ),
