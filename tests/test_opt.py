@@ -231,7 +231,6 @@ def test_opt_expr_var(
     assert opt_expr(expr) == expected
 
 
-@pytest.mark.xfail
 @pytest.mark.parametrize(
     "expr, expected",
     list[tuple[Expression, Expression]](
@@ -254,7 +253,6 @@ def test_opt_expr_bool(
     assert opt_expr(expr) == expected
 
 
-@pytest.mark.xfail
 @pytest.mark.parametrize(
     "expr, expected",
     list[tuple[Expression, Expression]](
@@ -281,7 +279,6 @@ def test_opt_expr_if(
     assert opt_expr(expr) == expected
 
 
-@pytest.mark.xfail
 @pytest.mark.parametrize(
     "expr, expected",
     list[tuple[Expression, Expression]](
@@ -304,7 +301,6 @@ def test_opt_expr_less_than(
     assert opt_expr(expr) == expected
 
 
-@pytest.mark.xfail
 @pytest.mark.parametrize(
     "expr, expected",
     list[tuple[Expression, Expression]](
@@ -331,7 +327,6 @@ def test_opt_expr_equal_to(
     assert opt_expr(expr) == expected
 
 
-@pytest.mark.xfail
 @pytest.mark.parametrize(
     "expr, expected",
     list[tuple[Expression, Expression]](

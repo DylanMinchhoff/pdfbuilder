@@ -90,15 +90,79 @@ def desugar_expr(
             match [*op]:
                 case []:
                     return Bool(True)
+                # case [a]:
+                #     return If(a, Bool(True), Bool(False))
                 case [a, *rest]:
-                    return If(a, recur(All([*rest])), Bool(True))
+                    return If(a, recur(All([*rest])), Bool(False))
 
         case Any([*op]):
             match [*op]:
                 case []:
                     return Bool(False)
                 case [a, *rest]:
-                    return If(a, Bool(True), recur(Any[*rest]))
+                    return If(a, Bool(True), recur(Any([*rest])))
+
+        case Cond([*seq], default):
+            match [*seq]:
+                case []:
+                    return default
+                case [[a, b], *rest]:
+                    return If(a, b, recur(Cond([*rest], default)))
+
+        case NonDescending([*statements]):
+            match [*statements]:
+                case []:
+                    return Bool(True)
+                case [Int(a)]:
+                    return Bool(True)
+                case [Int(a), Int(b)]:
+                    return GreaterThanOrEqualTo(Int(b), Int(a))
+                case [Int(a), Int(b), *rest]:
+                    return If(GreaterThanOrEqualTo(Int(b), Int(a)), recur(NonDescending([Int(b), *rest])), Bool(False))
+
+        case Ascending([*statements]):
+            match [*statements]:
+                case []:
+                    return Bool(True)
+                case [Int(a)]:
+                    return Bool(True)
+                case [Int(a), Int(b)]:
+                    return LessThan(Int(a), Int(b))
+                case [Int(a), Int(b), *rest]:
+                    return If(LessThan(Int(a), Int(b)), recur(Ascending([Int(b), *rest])), Bool(False))
+
+        case Same([*statements]):
+            match [*statements]:
+                case []:
+                    return Bool(True)
+                case [Int(a)]:
+                    return Bool(True)
+                case [Int(a), Int(b)]:
+                    return EqualTo(Int(a), Int(b))
+                case [Int(a), Int(b), *rest]:
+                    return If(EqualTo(Int(a), Int(b)), recur(Same([Int(b), *rest])), Bool(False))
+
+        case Descending([*statements]):
+            match [*statements]:
+                case []:
+                    return Bool(True)
+                case [Int(a)]:
+                    return Bool(True)
+                case [Int(a), Int(b)]:
+                    return LessThan(Int(b), Int(a))
+                case [Int(a), Int(b), *rest]:
+                    return If(LessThan(Int(b), Int(a)), recur(Descending([Int(b), *rest])), Bool(False))
+
+        case NonAscending([*statements]):
+            match [*statements]:
+                case []:
+                    return Bool(True)
+                case [Int(a)]:
+                    return Bool(True)
+                case [Int(a), Int(b)]:
+                    return GreaterThanOrEqualTo(Int(a), Int(b))
+                case [Int(a), Int(b), *rest]:
+                    return If(GreaterThanOrEqualTo(Int(a), Int(b)), recur(NonAscending([Int(b), *rest])), Bool(False))
 
         case Add(e1, e2):
             return Add(recur(e1), recur(e2))
