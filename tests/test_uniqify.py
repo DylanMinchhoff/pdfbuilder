@@ -14,6 +14,12 @@ from kernel import (
     LessThan,
     EqualTo,
     GreaterThanOrEqualTo,
+    Unit,
+    Cell,
+    Get,
+    Set,
+    Do,
+    While,
 )
 from uniqify import Environment, uniqify, uniqify_expr
 from util import SequentialNameGenerator
@@ -289,4 +295,144 @@ def test_uniqify_expr_greater_than_or_equal_to(
     fresh: Callable[[str], str],
     expected: Expression,
 ) -> None:
+    assert uniqify_expr(expr, env, fresh) == expected
+
+
+@pytest.mark.xfail()
+@pytest.mark.parametrize(
+    "expr, env, fresh, expected",
+    list[tuple[Expression, Environment, Callable[[str], str], Expression]](
+        [
+            (
+                Unit(),
+                {},
+                SequentialNameGenerator(),
+                Unit(),
+            ),
+        ]
+    ),
+)
+def test_uniqify_expr_unit(
+    expr: Int,
+    env: Environment,
+    fresh: Callable[[str], str],
+    expected: Expression,
+) -> None:
+    assert uniqify_expr(expr, env, fresh) == expected
+
+
+@pytest.mark.xfail()
+@pytest.mark.parametrize(
+    "expr, env, fresh, expected",
+    list[tuple[Expression, Environment, Callable[[str], str], Expression]](
+        [
+            (
+                Cell(Unit()),
+                {},
+                SequentialNameGenerator(),
+                Cell(Unit()),
+            ),
+        ]
+    ),
+)
+def test_uniqify_expr_cell(
+    expr: Int,
+    env: Environment,
+    fresh: Callable[[str], str],
+    expected: Expression,
+) -> None:
+    assert uniqify_expr(expr, env, fresh) == expected
+
+
+@pytest.mark.xfail()
+@pytest.mark.parametrize(
+    "expr, env, fresh, expected",
+    list[tuple[Expression, Environment, Callable[[str], str], Expression]](
+        [
+            (
+                Get(Var("x")),
+                {"x": "x"},
+                SequentialNameGenerator(),
+                Get(Var("x")),
+            ),
+        ]
+    ),
+)
+def test_uniqify_expr_get(
+    expr: Int,
+    env: Environment,
+    fresh: Callable[[str], str],
+    expected: Expression,
+) -> None:
+    assert uniqify_expr(expr, env, fresh) == expected
+
+
+@pytest.mark.xfail()
+@pytest.mark.parametrize(
+    "expr, env, fresh, expected",
+    list[tuple[Expression, Environment, Callable[[str], str], Expression]](
+        [
+            (
+                Set(Var("x"), Unit()),
+                {"x": "x"},
+                SequentialNameGenerator(),
+                Set(Var("x"), Unit()),
+            ),
+        ]
+    ),
+)
+def test_uniqify_expr_set(
+    expr: Int,
+    env: Environment,
+    fresh: Callable[[str], str],
+    expected: Expression,
+) -> None:
+    assert uniqify_expr(expr, env, fresh) == expected
+
+
+@pytest.mark.xfail()
+@pytest.mark.parametrize(
+    "expr, env, fresh, expected",
+    list[tuple[Expression, Environment, Callable[[str], str], Expression]](
+        [
+            (
+                Do(Int(0), Unit()),
+                {},
+                SequentialNameGenerator(),
+                Do(Int(0), Unit()),
+            ),
+        ]
+    ),
+)
+def test_uniqify_expr_do(
+    expr: Int,
+    env: Environment,
+    fresh: Callable[[str], str],
+    expected: Expression,
+) -> None:
+    fresh = SequentialNameGenerator()
+    assert uniqify_expr(expr, env, fresh) == expected
+
+
+@pytest.mark.xfail()
+@pytest.mark.parametrize(
+    "expr, env, fresh, expected",
+    list[tuple[Expression, Environment, Callable[[str], str], Expression]](
+        [
+            (
+                While(Bool(True), Int(1)),
+                {},
+                SequentialNameGenerator(),
+                While(Bool(True), Int(1)),
+            ),
+        ]
+    ),
+)
+def test_uniqify_expr_while(
+    expr: Int,
+    env: Environment,
+    fresh: Callable[[str], str],
+    expected: Expression,
+) -> None:
+    fresh = SequentialNameGenerator()
     assert uniqify_expr(expr, env, fresh) == expected

@@ -22,6 +22,12 @@ from kernel import (
     LessThan,
     EqualTo,
     GreaterThanOrEqualTo,
+    Unit,
+    Cell,
+    Get,
+    Set,
+    Do,
+    While,
 )
 
 
@@ -117,6 +123,45 @@ class AstTransformer(Transformer[Token, Any]):
     ) -> GreaterThanOrEqualTo[Expression]:
         return GreaterThanOrEqualTo(x, y)
 
+    def unit_expr(
+        self,
+        value: Unit,
+    ) -> Unit:
+        return value
+
+    def cell_expr(
+        self,
+        value: Expression,
+    ) -> Cell[Expression]:
+        return Cell(value)
+
+    def get_expr(
+        self,
+        cell: Expression,
+    ) -> Get[Expression]:
+        return Get(cell)
+
+    def set_expr(
+        self,
+        cell: Expression,
+        value: Expression,
+    ) -> Set[Expression]:
+        return Set(cell, value)
+
+    def do_expr(
+        self,
+        first: Expression,
+        second: Expression,
+    ) -> Do[Expression, Expression]:
+        return Do(first, second)
+
+    def while_expr(
+        self,
+        condition: Expression,
+        body: Expression,
+    ) -> While[Expression, Expression]:
+        return While(condition, body)
+
     def int(
         self,
         value: Token,
@@ -134,6 +179,12 @@ class AstTransformer(Transformer[Token, Any]):
         value: Token,
     ) -> bool:
         return False
+
+    def unit(
+        self,
+        value: Token,
+    ) -> Unit:
+        return Unit()
 
     def identifier(
         self,

@@ -1,4 +1,5 @@
 from collections.abc import Sequence, Mapping
+from dataclasses import dataclass
 from functools import partial
 from typing import Union
 from kernel import (
@@ -15,26 +16,43 @@ from kernel import (
     LessThan,
     EqualTo,
     GreaterThanOrEqualTo,
+    Unit,
+    Cell,
+    Get,
+    Set,
+    Do,
+    While,
 )
+from store import Store
 
 
-type Value = Union[Int, Bool]
+@dataclass(frozen=True)
+class Location:
+    value: int
+
+
+type Value = Union[Int, Bool, Unit, Location]
+
 type Environment = Mapping[str, Value]
 
 
 def eval(
     program: Program,
-    arguments: Sequence[Value],
+    arguments: Sequence[Int],
 ) -> Value:
-    env: Environment = {p: a for p, a in zip(program.parameters, arguments, strict=True)}
-    return eval_expr(program.body, env)
+    return eval_expr(
+        expr=program.body,
+        env={p: a for p, a in zip(program.parameters, arguments, strict=True)},
+        store=Store(),
+    )
 
 
 def eval_expr(
     expr: Expression,
     env: Environment,
+    store: Store[Value],
 ) -> Value:
-    recur = partial(eval_expr, env=env)
+    recur = partial(eval_expr, env=env, store=store)
     match expr:
         case Int():
             return expr
@@ -43,7 +61,7 @@ def eval_expr(
             match recur(e1), recur(e2):
                 case [Int(i1), Int(i2)]:
                     return Int(i1 + i2)
-                case [_, _]:  # pragma: no cover
+                case _:  # pragma: no cover
                     raise ValueError()
 
         case Subtract(e1, e2):
@@ -66,20 +84,40 @@ def eval_expr(
         case Var(x):
             return env[x]
 
-        case Bool(val):
-            return Bool(val)
+        case Bool():
+            return expr
 
-        case If(cond, con, alt):
-            return con if (recur(cond).value == True) else alt
+        case If(e1, e2, e3):
+            match recur(e1):
+                case Bool(True):
+                    return recur(e2)
+                case Bool(False):
+                    return recur(e3)
+                case _:  # pragma: no cover
+                    raise ValueError()
 
-        case LessThan(a, b):
-            return Bool(value=True) if a.value < b.value else Bool(value=False)
+        case LessThan(e1, e2):
+            match recur(e1), recur(e2):
+                case [Int(i1), Int(i2)]:
+                    return Bool(i1 < i2)
+                case _:  # pragma: no cover
+                    raise ValueError()
 
-        case GreaterThanOrEqualTo(a, b):
-            return Bool(value=True) if a.value >= b.value else Bool(value=False)
+        case EqualTo(e1, e2):
+            match recur(e1), recur(e2):
+                case [Int(i1), Int(i2)]:
+                    return Bool(i1 == i2)
+                case [Bool(b1), Bool(b2)]:
+                    return Bool(b1 == b2)
+                case _:  # pragma: no cover
+                    raise ValueError()
 
-        case EqualTo(a, b):
-            return Bool(value=True) if a == b else Bool(value=False)
+        case GreaterThanOrEqualTo(e1, e2):
+            match recur(e1), recur(e2):
+                case [Int(i1), Int(i2)]:
+                    return Bool(i1 >= i2)
+                case _:  # pragma: no cover
+                    raise ValueError()
 
-        case _:
+        case _:  # pragma: no branch
             raise NotImplementedError()

@@ -1,34 +1,23 @@
 from functools import partial
 import sugar
 from sugar import (
-    Sum,
-    Difference,
-    Product,
+    Int,
+    Let,
+    Var,
     LetStar,
-    Cond,
+    Bool,
     Not,
     All,
     Any,
-    NonAscending,
-    Descending,
-    Same,
-    Ascending,
-    NonDescending,
+    If,
+    Cond,
+    Unit,
+    Cell,
+    Get,
+    Set,
+    While,
 )
 import kernel
-from kernel import (
-    Int,
-    Add,
-    Subtract,
-    Multiply,
-    Let,
-    Var,
-    Bool,
-    If,
-    LessThan,
-    EqualTo,
-    GreaterThanOrEqualTo,
-)
 
 
 def desugar(
@@ -49,129 +38,34 @@ def desugar_expr(
         case Int():
             return expr
 
-        case Sum([*vals]):
-            match [*vals]:
+        case sugar.Add(es):
+            match es:
                 case []:
                     return Int(0)
-                case [Int(a), *rest]:
-                    return Add(Int(a), recur(Sum([*rest])))
+                case [first, *rest]:
+                    return kernel.Add(recur(first), recur(sugar.Add(rest)))
+                case _:  # pragma: no cover
+                    raise NotImplementedError()
 
-        case Difference([*vals]):
-            match [*vals]:
-                case []:
-                    return Int(0)
-                case [Int(a)]:
-                    return Subtract(Int(0), Int(a))
-                case [Int(a), Int(b)]:
-                    return Subtract(Int(a), Int(b))
-                case [Int(a), *rest]:
-                    return Subtract(Int(a), recur(Difference([*rest])))
+        case sugar.Subtract(es):
+            match es:
+                case [first]:
+                    return kernel.Subtract(Int(0), recur(first))
+                case [first, second]:
+                    return kernel.Subtract(recur(first), recur(second))
+                case [first, *rest]:
+                    return kernel.Subtract(recur(first), recur(sugar.Subtract(rest)))
+                case _:  # pragma: no cover
+                    raise NotImplementedError()
 
-        case Product([*vals]):
-            match [*vals]:
+        case sugar.Multiply(es):
+            match es:
                 case []:
                     return Int(1)
-                case [Int(a), *rest]:
-                    return Multiply(Int(a), recur(Product([*rest])))
-
-        case LetStar([*lets], body):
-            match [*lets]:
-                case []:
-                    return body
-                case [[n, e]]:
-                    return Let(n, e, body)
-                case [[n, e], *rest]:
-                    return Let(n, e, recur(LetStar([*rest], body)))
-
-        case Not(a):
-            return If(EqualTo(a, Bool(True)), Bool(False), Bool(True))
-
-        case All([*op]):
-            match [*op]:
-                case []:
-                    return Bool(True)
-                # case [a]:
-                #     return If(a, Bool(True), Bool(False))
-                case [a, *rest]:
-                    return If(a, recur(All([*rest])), Bool(False))
-
-        case Any([*op]):
-            match [*op]:
-                case []:
-                    return Bool(False)
-                case [a, *rest]:
-                    return If(a, Bool(True), recur(Any([*rest])))
-
-        case Cond([*seq], default):
-            match [*seq]:
-                case []:
-                    return default
-                case [[a, b], *rest]:
-                    return If(a, b, recur(Cond([*rest], default)))
-
-        case NonDescending([*statements]):
-            match [*statements]:
-                case []:
-                    return Bool(True)
-                case [Int(a)]:
-                    return Bool(True)
-                case [Int(a), Int(b)]:
-                    return GreaterThanOrEqualTo(Int(b), Int(a))
-                case [Int(a), Int(b), *rest]:
-                    return If(GreaterThanOrEqualTo(Int(b), Int(a)), recur(NonDescending([Int(b), *rest])), Bool(False))
-
-        case Ascending([*statements]):
-            match [*statements]:
-                case []:
-                    return Bool(True)
-                case [Int(a)]:
-                    return Bool(True)
-                case [Int(a), Int(b)]:
-                    return LessThan(Int(a), Int(b))
-                case [Int(a), Int(b), *rest]:
-                    return If(LessThan(Int(a), Int(b)), recur(Ascending([Int(b), *rest])), Bool(False))
-
-        case Same([*statements]):
-            match [*statements]:
-                case []:
-                    return Bool(True)
-                case [Int(a)]:
-                    return Bool(True)
-                case [Int(a), Int(b)]:
-                    return EqualTo(Int(a), Int(b))
-                case [Int(a), Int(b), *rest]:
-                    return If(EqualTo(Int(a), Int(b)), recur(Same([Int(b), *rest])), Bool(False))
-
-        case Descending([*statements]):
-            match [*statements]:
-                case []:
-                    return Bool(True)
-                case [Int(a)]:
-                    return Bool(True)
-                case [Int(a), Int(b)]:
-                    return LessThan(Int(b), Int(a))
-                case [Int(a), Int(b), *rest]:
-                    return If(LessThan(Int(b), Int(a)), recur(Descending([Int(b), *rest])), Bool(False))
-
-        case NonAscending([*statements]):
-            match [*statements]:
-                case []:
-                    return Bool(True)
-                case [Int(a)]:
-                    return Bool(True)
-                case [Int(a), Int(b)]:
-                    return GreaterThanOrEqualTo(Int(a), Int(b))
-                case [Int(a), Int(b), *rest]:
-                    return If(GreaterThanOrEqualTo(Int(a), Int(b)), recur(NonAscending([Int(b), *rest])), Bool(False))
-
-        case Add(e1, e2):
-            return Add(recur(e1), recur(e2))
-
-        case Subtract(e1, e2):
-            return Subtract(recur(e1), recur(e2))
-
-        case Multiply(e1, e2):
-            return Multiply(recur(e1), recur(e2))
+                case [first, *rest]:
+                    return kernel.Multiply(recur(first), recur(sugar.Multiply(rest)))
+                case _:  # pragma: no cover
+                    raise NotImplementedError()
 
         case Let(x, e1, e2):
             return Let(x, recur(e1), recur(e2))
@@ -179,20 +73,126 @@ def desugar_expr(
         case Var():
             return expr
 
+        case LetStar(bindings, body):
+            match bindings:
+                case []:
+                    return recur(body)
+                case [[x, e1], *rest]:
+                    return Let(x, recur(e1), recur(LetStar(rest, body)))
+                case _:  # pragma: no cover
+                    raise NotImplementedError()
+
         case Bool():
             return expr
 
-        case If(cond, con, alt):
-            return If(cond, con, alt)
+        case Not(e1):
+            return If(kernel.EqualTo(recur(e1), Bool(True)), Bool(False), Bool(True))
 
-        case LessThan(a, b):
-            return LessThan(a, b)
+        case All(es):
+            match es:
+                case []:
+                    return Bool(True)
+                case [first, *rest]:
+                    return If(recur(first), recur(All(rest)), Bool(False))
+                case _:  # pragma: no cover
+                    raise NotImplementedError()
 
-        case GreaterThanOrEqualTo(a, b):
-            return GreaterThanOrEqualTo(a, b)
+        case Any(es):
+            match es:
+                case []:
+                    return Bool(False)
+                case [first, *rest]:
+                    return If(recur(first), Bool(True), recur(Any(rest)))
+                case _:  # pragma: no cover
+                    raise NotImplementedError()
 
-        case EqualTo(a, b):
-            return EqualTo(a, b)
+        case If(e1, e2, e3):
+            return If(recur(e1), recur(e2), recur(e3))
 
-        case _:
+        case Cond(arms, default):
+            match arms:
+                case []:
+                    return recur(default)
+                case [[e1, e2], *rest]:
+                    return If(recur(e1), recur(e2), recur(Cond(rest, default)))
+                case _:  # pragma: no cover
+                    raise NotImplementedError()
+
+        case sugar.LessThanOrEqualTo(es):
+            match es:
+                case [] | [_]:
+                    return Bool(True)
+                case [first, second]:
+                    return kernel.GreaterThanOrEqualTo(recur(second), recur(first))
+                case [first, second, *rest]:
+                    return If(
+                        kernel.GreaterThanOrEqualTo(recur(second), recur(first)),
+                        recur(sugar.LessThanOrEqualTo([second, *rest])),
+                        Bool(False),
+                    )
+                case _:  # pragma: no cover
+                    raise NotImplementedError()
+
+        case sugar.LessThan(es):
+            match es:
+                case [] | [_]:
+                    return Bool(True)
+                case [first, second]:
+                    return kernel.LessThan(recur(first), recur(second))
+                case [first, second, *rest]:
+                    return If(
+                        kernel.LessThan(recur(first), recur(second)),
+                        recur(sugar.LessThan([second, *rest])),
+                        Bool(False),
+                    )
+                case _:  # pragma: no cover
+                    raise NotImplementedError()
+
+        case sugar.EqualTo(es):
+            match es:
+                case [] | [_]:
+                    return Bool(True)
+                case [first, second]:
+                    return kernel.EqualTo(recur(first), recur(second))
+                case [first, second, *rest]:
+                    return If(
+                        kernel.EqualTo(recur(first), recur(second)),
+                        recur(sugar.EqualTo([second, *rest])),
+                        Bool(False),
+                    )
+                case _:  # pragma: no cover
+                    raise NotImplementedError()
+
+        case sugar.GreaterThan(es):
+            match es:
+                case [] | [_]:
+                    return Bool(True)
+                case [first, second]:
+                    return kernel.LessThan(recur(second), recur(first))
+                case [first, second, *rest]:
+                    return If(
+                        kernel.LessThan(recur(second), recur(first)),
+                        recur(sugar.GreaterThan([second, *rest])),
+                        Bool(False),
+                    )
+                case _:  # pragma: no cover
+                    raise NotImplementedError()
+
+        case sugar.GreaterThanOrEqualTo(es):  # pragma: no branch
+            match es:
+                case [] | [_]:
+                    return Bool(True)
+                case [first, second]:
+                    return kernel.GreaterThanOrEqualTo(recur(first), recur(second))
+                case [first, second, *rest]:
+                    return If(
+                        kernel.GreaterThanOrEqualTo(recur(first), recur(second)),
+                        recur(sugar.GreaterThanOrEqualTo([second, *rest])),
+                        Bool(False),
+                    )
+
+                case _:  # pragma: no cover
+                    raise NotImplementedError()
+
+        case _:  # pragma: no branch
             raise NotImplementedError()

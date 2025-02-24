@@ -13,6 +13,12 @@ from kernel import (
     LessThan,
     EqualTo,
     GreaterThanOrEqualTo,
+    Unit,
+    Cell,
+    Get,
+    Set,
+    Do,
+    While,
 )
 
 
@@ -91,46 +97,40 @@ def opt_expr(
         case Var():
             return expr
 
-        case Bool(value):
-            return Bool(value)
+        case Bool():
+            return expr
 
-        case If(a, b, c):
-            resA = recur(a)
-            if resA == Bool(True):
-                return b
-            elif resA == Bool(False):
-                return c
-            else:
-                return If(a, b, c)
+        case If(e1, e2, e3):
+            match recur(e1):
+                case Bool(True):
+                    return recur(e2)
+                case Bool(False):
+                    return recur(e3)
+                case e1:  # pragma: no branch
+                    return If(e1, recur(e2), recur(e3))
 
-        case LessThan(a, b):
-            resA = recur(a)
-            resB = recur(b)
-            match [resA, resB]:
-                case [Int(a), Int(b)]:
-                    return Bool(a < b)
-                case _:
-                    return LessThan(a, b)
+        case LessThan(e1, e2):
+            match recur(e1), recur(e2):
+                case [Int(i1), Int(i2)]:
+                    return Bool(i1 < i2)
+                case [e1, e2]:  # pragma: no branch
+                    return LessThan(e1, e2)
 
-        case GreaterThanOrEqualTo(a, b):
-            resA = recur(a)
-            resB = recur(b)
-            match [resA, resB]:
-                case [Int(a), Int(b)]:
-                    return Bool(a >= b)
-                case _:
-                    return GreaterThanOrEqualTo(a, b)
+        case EqualTo(e1, e2):
+            match recur(e1), recur(e2):
+                case [Int(i1), Int(i2)]:
+                    return Bool(i1 == i2)
+                case [Bool(b1), Bool(b2)]:
+                    return Bool(b1 == b2)
+                case [e1, e2]:  # pragma: no branch
+                    return EqualTo(e1, e2)
 
-        case EqualTo(a, b):
-            resA = recur(a)
-            resB = recur(b)
-            match [resA, resB]:
-                case [Int(a), Int(b)]:
-                    return Bool(a == b)
-                case [Bool(a), Bool(b)]:
-                    return Bool(a == b)
-                case _:
-                    return EqualTo(a, b)
+        case GreaterThanOrEqualTo(e1, e2):
+            match recur(e1), recur(e2):
+                case [Int(i1), Int(i2)]:
+                    return Bool(i1 >= i2)
+                case [e1, e2]:  # pragma: no branch
+                    return GreaterThanOrEqualTo(e1, e2)
 
-        case _:
+        case _:  # pragma: branch
             raise NotImplementedError()

@@ -1,4 +1,6 @@
-program: "(" "program" "(" parameters ")" expr ")"
+program: "(" "program" "(" parameters* ")" expr ")"
+
+parameters: identifier*
 
 expr: int                                                           -> int_expr
     | "(" "+" expr expr ")"                                         -> add_expr
@@ -11,18 +13,25 @@ expr: int                                                           -> int_expr
     | "(" "<" expr expr ")"                                         -> less_than_expr
     | "(" "==" expr expr ")"                                        -> equal_to_expr
     | "(" ">=" expr expr ")"                                        -> greater_than_or_equal_to_expr
-
-parameters: identifier*
+    | unit                                                          -> unit_expr
+    | "(" "cell" expr ")"                                           -> cell_expr
+    | "(" "get" expr ")"                                            -> get_expr
+    | "(" "set" expr expr ")"                                       -> set_expr
+    | "(" "do" expr expr ")"                                        -> do_expr
+    | "(" "while" expr expr ")"                                     -> while_expr
 
 int: INT
 true: TRUE
 false: FALSE
+unit: UNIT
 identifier: IDENTIFIER
 
 INT: ("0".."9")+
 
 TRUE: "#t"
 FALSE: "#f"
+
+UNIT: "#u"
 
 IDENTIFIER: /[^\W\d]\w*/
 

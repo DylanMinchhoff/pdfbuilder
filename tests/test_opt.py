@@ -13,6 +13,12 @@ from kernel import (
     LessThan,
     EqualTo,
     GreaterThanOrEqualTo,
+    Unit,
+    Cell,
+    Get,
+    Set,
+    Do,
+    While,
 )
 from opt import opt, opt_expr
 
@@ -343,6 +349,128 @@ def test_opt_expr_equal_to(
     ),
 )
 def test_opt_expr_greeater_than_or_equal_to(
+    expr: Expression,
+    expected: Expression,
+) -> None:
+    assert opt_expr(expr) == expected
+
+
+@pytest.mark.xfail()
+@pytest.mark.parametrize(
+    "expr, expected",
+    list[tuple[Expression, Expression]](
+        [
+            (
+                Unit(),
+                Unit(),
+            ),
+        ]
+    ),
+)
+def test_opt_expr_unit(
+    expr: Expression,
+    expected: Expression,
+) -> None:
+    assert opt_expr(expr) == expected
+
+
+@pytest.mark.xfail()
+@pytest.mark.parametrize(
+    "expr, expected",
+    list[tuple[Expression, Expression]](
+        [
+            (
+                Cell(Unit()),
+                Cell(Unit()),
+            ),
+        ]
+    ),
+)
+def test_opt_expr_cell(
+    expr: Expression,
+    expected: Expression,
+) -> None:
+    assert opt_expr(expr) == expected
+
+
+@pytest.mark.xfail()
+@pytest.mark.parametrize(
+    "expr, expected",
+    list[tuple[Expression, Expression]](
+        [
+            (
+                Get(Cell[Expression](Unit())),
+                Unit(),
+            ),
+            (
+                Get(Var("x")),
+                Get(Var("x")),
+            ),
+        ]
+    ),
+)
+def test_opt_expr_get(
+    expr: Expression,
+    expected: Expression,
+) -> None:
+    assert opt_expr(expr) == expected
+
+
+@pytest.mark.xfail()
+@pytest.mark.parametrize(
+    "expr, expected",
+    list[tuple[Expression, Expression]](
+        [
+            (
+                Set(Var("x"), Var("y")),
+                Set(Var("x"), Var("y")),
+            ),
+        ]
+    ),
+)
+def test_opt_expr_set(
+    expr: Expression,
+    expected: Expression,
+) -> None:
+    assert opt_expr(expr) == expected
+
+
+@pytest.mark.xfail()
+@pytest.mark.parametrize(
+    "expr, expected",
+    list[tuple[Expression, Expression]](
+        [
+            (
+                Do(Var("x"), Var("y")),
+                Do(Var("x"), Var("y")),
+            ),
+        ]
+    ),
+)
+def test_opt_expr_do(
+    expr: Expression,
+    expected: Expression,
+) -> None:
+    assert opt_expr(expr) == expected
+
+
+@pytest.mark.xfail()
+@pytest.mark.parametrize(
+    "expr, expected",
+    list[tuple[Expression, Expression]](
+        [
+            (
+                While(Bool(False), Int(0)),
+                Unit(),
+            ),
+            (
+                While(Var("x"), Int(0)),
+                While(Var("x"), Int(0)),
+            ),
+        ]
+    ),
+)
+def test_opt_expr_while(
     expr: Expression,
     expected: Expression,
 ) -> None:
