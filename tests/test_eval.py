@@ -309,7 +309,6 @@ def test_eval_expr_greater_than_or_equal_to(
     assert eval_expr(expr, env, store) == expected
 
 
-@pytest.mark.xfail()
 @pytest.mark.parametrize(
     "expr, env, store, expected",
     list[tuple[Expression, Environment, Store[Value], Value]](
@@ -332,7 +331,6 @@ def test_eval_expr_unit(
     assert eval_expr(expr, env, store) == expected
 
 
-@pytest.mark.xfail()
 @pytest.mark.parametrize(
     "expr, env, store, expected",
     list[tuple[Expression, Environment, Store[Value], Value]](
@@ -355,7 +353,6 @@ def test_eval_expr_cell(
     assert eval_expr(expr, env, store) == expected
 
 
-@pytest.mark.xfail()
 @pytest.mark.parametrize(
     "expr, env, store, expected",
     list[tuple[Expression, Environment, Store[Value], Value]](
@@ -378,7 +375,6 @@ def test_eval_expr_get(
     assert eval_expr(expr, env, store) == expected
 
 
-@pytest.mark.xfail()
 @pytest.mark.parametrize(
     "expr, env, store, expected",
     list[tuple[Expression, Environment, Store[Value], Value]](
@@ -401,7 +397,6 @@ def test_eval_expr_set(
     assert eval_expr(expr, env, store) == expected
 
 
-@pytest.mark.xfail()
 @pytest.mark.parametrize(
     "expr, env, store, expected",
     list[tuple[Expression, Environment, Store[Value], Value]](
@@ -424,7 +419,6 @@ def test_eval_expr_do(
     assert eval_expr(expr, env, store) == expected
 
 
-@pytest.mark.xfail()
 @pytest.mark.parametrize(
     "expr, env, store, expected",
     list[tuple[Expression, Environment, Store[Value], Value]](

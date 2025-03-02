@@ -484,7 +484,6 @@ def test_desugar_expr_greater_than_or_equal_to(
     assert desugar_expr(expr) == expected
 
 
-@pytest.mark.xfail()
 @pytest.mark.parametrize(
     "expr, expected",
     list[tuple[sugar.Expression, kernel.Expression]](
@@ -503,7 +502,6 @@ def test_desugar_expr_unit(
     assert desugar_expr(expr) == expected
 
 
-@pytest.mark.xfail()
 @pytest.mark.parametrize(
     "expr, expected",
     list[tuple[sugar.Expression, kernel.Expression]](
@@ -522,7 +520,6 @@ def test_desugar_expr_cell(
     assert desugar_expr(expr) == expected
 
 
-@pytest.mark.xfail()
 @pytest.mark.parametrize(
     "expr, expected",
     list[tuple[sugar.Expression, kernel.Expression]](
@@ -541,7 +538,6 @@ def test_desugar_expr_get(
     assert desugar_expr(expr) == expected
 
 
-@pytest.mark.xfail()
 @pytest.mark.parametrize(
     "expr, expected",
     list[tuple[sugar.Expression, kernel.Expression]](
@@ -560,7 +556,6 @@ def test_desugar_expr_set(
     assert desugar_expr(expr) == expected
 
 
-@pytest.mark.xfail()
 @pytest.mark.parametrize(
     "expr, expected",
     list[tuple[sugar.Expression, kernel.Expression]](
@@ -587,7 +582,6 @@ def test_desugar_expr_begin(
     assert desugar_expr(expr) == expected
 
 
-@pytest.mark.xfail()
 @pytest.mark.parametrize(
     "expr, expected",
     list[tuple[sugar.Expression, kernel.Expression]](

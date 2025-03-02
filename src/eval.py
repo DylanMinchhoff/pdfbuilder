@@ -119,5 +119,27 @@ def eval_expr(
                 case _:  # pragma: no cover
                     raise ValueError()
 
+        case Cell(value):
+            return Location(store.next_free)
+
+        case Get(cell):
+            return cell.value
+
+        case Set(cell, value):
+            Store[Cell(value)]
+            return Unit()
+
+        case Do(first, second):
+            recur(first)
+            return recur(second)
+
+        case While(condition, body):
+            while condition == Bool(True):
+                recur(body)
+            return Unit()
+
+        case Unit():
+            return Unit()
+
         case _:  # pragma: no branch
             raise NotImplementedError()

@@ -79,5 +79,23 @@ def uniqify_expr(
         case GreaterThanOrEqualTo(e1, e2):
             return GreaterThanOrEqualTo(recur(e1), recur(e2))
 
+        case Unit():
+            return Unit()
+
+        case Get(value):
+            return Get(value)
+
+        case Set(cell, value):
+            return Set(cell, value)
+
+        case Cell(value):
+            return Cell(value)
+
+        case Do(a, b):
+            return Do(a, b)
+
+        case While(cond, body):
+            return While(cond, body)
+
         case _:  # pragma: no branch
             raise NotADirectoryError()

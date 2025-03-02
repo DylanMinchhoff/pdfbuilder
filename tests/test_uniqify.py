@@ -298,7 +298,6 @@ def test_uniqify_expr_greater_than_or_equal_to(
     assert uniqify_expr(expr, env, fresh) == expected
 
 
-@pytest.mark.xfail()
 @pytest.mark.parametrize(
     "expr, env, fresh, expected",
     list[tuple[Expression, Environment, Callable[[str], str], Expression]](
@@ -321,7 +320,6 @@ def test_uniqify_expr_unit(
     assert uniqify_expr(expr, env, fresh) == expected
 
 
-@pytest.mark.xfail()
 @pytest.mark.parametrize(
     "expr, env, fresh, expected",
     list[tuple[Expression, Environment, Callable[[str], str], Expression]](
@@ -344,7 +342,6 @@ def test_uniqify_expr_cell(
     assert uniqify_expr(expr, env, fresh) == expected
 
 
-@pytest.mark.xfail()
 @pytest.mark.parametrize(
     "expr, env, fresh, expected",
     list[tuple[Expression, Environment, Callable[[str], str], Expression]](
@@ -367,7 +364,6 @@ def test_uniqify_expr_get(
     assert uniqify_expr(expr, env, fresh) == expected
 
 
-@pytest.mark.xfail()
 @pytest.mark.parametrize(
     "expr, env, fresh, expected",
     list[tuple[Expression, Environment, Callable[[str], str], Expression]](
@@ -390,7 +386,6 @@ def test_uniqify_expr_set(
     assert uniqify_expr(expr, env, fresh) == expected
 
 
-@pytest.mark.xfail()
 @pytest.mark.parametrize(
     "expr, env, fresh, expected",
     list[tuple[Expression, Environment, Callable[[str], str], Expression]](
@@ -414,7 +409,6 @@ def test_uniqify_expr_do(
     assert uniqify_expr(expr, env, fresh) == expected
 
 
-@pytest.mark.xfail()
 @pytest.mark.parametrize(
     "expr, env, fresh, expected",
     list[tuple[Expression, Environment, Callable[[str], str], Expression]](

@@ -355,7 +355,6 @@ def test_opt_expr_greeater_than_or_equal_to(
     assert opt_expr(expr) == expected
 
 
-@pytest.mark.xfail()
 @pytest.mark.parametrize(
     "expr, expected",
     list[tuple[Expression, Expression]](
@@ -374,7 +373,6 @@ def test_opt_expr_unit(
     assert opt_expr(expr) == expected
 
 
-@pytest.mark.xfail()
 @pytest.mark.parametrize(
     "expr, expected",
     list[tuple[Expression, Expression]](
@@ -393,7 +391,6 @@ def test_opt_expr_cell(
     assert opt_expr(expr) == expected
 
 
-@pytest.mark.xfail()
 @pytest.mark.parametrize(
     "expr, expected",
     list[tuple[Expression, Expression]](
@@ -416,7 +413,6 @@ def test_opt_expr_get(
     assert opt_expr(expr) == expected
 
 
-@pytest.mark.xfail()
 @pytest.mark.parametrize(
     "expr, expected",
     list[tuple[Expression, Expression]](
@@ -435,7 +431,6 @@ def test_opt_expr_set(
     assert opt_expr(expr) == expected
 
 
-@pytest.mark.xfail()
 @pytest.mark.parametrize(
     "expr, expected",
     list[tuple[Expression, Expression]](
@@ -454,7 +449,6 @@ def test_opt_expr_do(
     assert opt_expr(expr) == expected
 
 
-@pytest.mark.xfail()
 @pytest.mark.parametrize(
     "expr, expected",
     list[tuple[Expression, Expression]](

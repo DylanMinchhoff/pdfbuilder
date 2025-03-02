@@ -14,6 +14,7 @@ from sugar import (
     Unit,
     Cell,
     Get,
+    Do,
     Set,
     While,
 )
@@ -193,6 +194,32 @@ def desugar_expr(
 
                 case _:  # pragma: no cover
                     raise NotImplementedError()
+
+        case sugar.Cell(es):
+            return Cell(es)
+
+        case sugar.Unit():
+            return Unit()
+
+        case sugar.Get(es):
+            return Get(es)
+
+        case sugar.Set(e1, e2):
+            return Set(e1, e2)
+
+        case sugar.Do(op):
+            match op:
+                case []:
+                    return Unit()
+                case [a]:
+                    return a
+                case [a, b]:
+                    return kernel.Do(a, b)
+                case _:
+                    print("default do case reached")
+
+        case sugar.While(cond, body):
+            return While(cond, body)
 
         case _:  # pragma: no branch
             raise NotImplementedError()

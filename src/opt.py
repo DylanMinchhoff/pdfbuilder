@@ -132,5 +132,29 @@ def opt_expr(
                 case [e1, e2]:  # pragma: no branch
                     return GreaterThanOrEqualTo(e1, e2)
 
+        case Unit():
+            return Unit()
+
+        case Cell(value):
+            return Cell(value)
+
+        case Get(ex):
+            if recur(ex) == Cell(Unit()):
+                return Unit()
+            else:
+                return Get(ex)
+
+        case Set(cell, value):
+            return Set(cell, value)
+
+        case Do(a, b):
+            return Do(a, b)
+
+        case While(cond, body):
+            if recur(cond) == Bool(False):
+                return Unit()
+            else:
+                return While(cond, body)
+
         case _:  # pragma: branch
             raise NotImplementedError()
