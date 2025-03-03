@@ -1,8 +1,16 @@
 from collections.abc import Sequence
 from dataclasses import dataclass
-from typing import Annotated, Union
-from kernel import Int, Let, Var, Bool, If, Unit, Cell, Get, Set, While
-
+from typing import Union
+from sucrose import (
+    Int,
+    Var,
+    Bool,
+    If,
+    Unit,
+    Lambda,
+    Apply,
+    Assign,
+)
 
 type Expression = Union[
     Int,
@@ -10,12 +18,13 @@ type Expression = Union[
     Subtract[Expression],
     Multiply[Expression],
     Let[Expression, Expression],
-    Var,
     LetStar[Expression, Expression],
+    LetRec[Expression, Expression],
+    Var,
     Bool,
     Not[Expression],
-    All[Expression],
-    Any[Expression],
+    And[Expression],
+    Or[Expression],
     If[Expression, Expression, Expression],
     Cond[Expression, Expression, Expression],
     LessThanOrEqualTo[Expression],
@@ -27,8 +36,11 @@ type Expression = Union[
     Cell[Expression],
     Get[Expression],
     Set[Expression],
-    Do[Expression],
+    Begin[Expression],
     While[Expression, Expression],
+    Lambda[Expression],
+    Apply[Expression],
+    Assign[Expression],
 ]
 
 
@@ -39,12 +51,18 @@ class Add[Operand]:
 
 @dataclass(frozen=True)
 class Subtract[Operand]:
-    operands: Annotated[Sequence[Operand], "non-empty"]
+    operands: Sequence[Operand]
 
 
 @dataclass(frozen=True)
 class Multiply[Operand]:
     operands: Sequence[Operand]
+
+
+@dataclass(frozen=True)
+class Let[Value, Body]:
+    bindings: Sequence[tuple[str, Value]]
+    body: Body
 
 
 @dataclass(frozen=True)
@@ -54,17 +72,23 @@ class LetStar[Value, Body]:
 
 
 @dataclass(frozen=True)
-class Not[Operand]:
-    x: Operand
+class LetRec[Value, Body]:
+    bindings: Sequence[tuple[str, Value]]
+    body: Body
 
 
 @dataclass(frozen=True)
-class All[Operand]:
+class Not[Operand]:
+    operand: Operand
+
+
+@dataclass(frozen=True)
+class And[Operand]:
     operands: Sequence[Operand]
 
 
 @dataclass(frozen=True)
-class Any[Operand]:
+class Or[Operand]:
     operands: Sequence[Operand]
 
 
@@ -100,11 +124,34 @@ class GreaterThanOrEqualTo[Operand]:
 
 
 @dataclass(frozen=True)
-class Do[Operand]:
+class Cell[Operand]:
+    value: Operand
+
+
+@dataclass(frozen=True)
+class Get[Operand]:
+    cell: Operand
+
+
+@dataclass(frozen=True)
+class Set[Operand]:
+    cell: Operand
+    value: Operand
+
+
+@dataclass(frozen=True)
+class Begin[Operand]:
     operands: Sequence[Operand]
+
+
+@dataclass(frozen=True)
+class While[Condition, Body]:
+    condition: Condition
+    body: Body
 
 
 @dataclass(frozen=True)
 class Program:
     parameters: Sequence[str]
+    definitions: Sequence[tuple[str, Expression]]
     body: Expression

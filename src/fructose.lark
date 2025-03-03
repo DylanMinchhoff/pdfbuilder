@@ -1,0 +1,90 @@
+program: "(" _PROGRAM "(" parameters ")" definitions expr ")"
+
+parameters: identifier*
+
+definitions: definition*
+
+definition: "(" _DEF identifier expr ")"                            -> value_def
+          | "(" _DEF "(" identifier parameters ")" expr ")"         -> function_def
+
+expr: int                                                           -> int_expr
+    | "(" _ADD expr* ")"                                            -> add_expr
+    | "(" _SUBTRACT expr+ ")"                                       -> subtract_expr
+    | "(" _MULTIPLY expr* ")"                                       -> multiply_expr
+    | "(" _LET "(" bindings ")" expr ")"                            -> let_expr
+    | "(" _LETSTAR "(" bindings ")" expr ")"                        -> letstar_expr
+    | "(" _LETREC "(" bindings ")" expr ")"                         -> letrec_expr
+    | identifier                                                    -> var_expr
+    | _TRUE                                                         -> true_expr
+    | _FALSE                                                        -> false_expr
+    | "(" _NOT expr ")"                                             -> not_expr
+    | "(" _AND expr* ")"                                            -> and_expr
+    | "(" _OR expr* ")"                                             -> or_expr
+    | "(" _IF expr expr expr ")"                                    -> if_expr
+    | "(" _COND arms "(" _ELSE expr ")" ")"                         -> cond_expr
+    | "(" _LESS_THAN_OR_EQUAL_TO expr* ")"                          -> less_than_or_equal_to_expr
+    | "(" _LESS_THAN expr* ")"                                      -> less_than_expr
+    | "(" _EQUAL_TO expr* ")"                                       -> equal_to_expr
+    | "(" _GREATER_THAN expr* ")"                                   -> greater_than
+    | "(" _GREATER_THAN_OR_EQUAL_TO expr* ")"                       -> greater_than_or_equal_to_expr
+    | _UNIT                                                         -> unit_expr
+    | "(" _CELL expr ")"                                            -> cell_expr
+    | "(" _GET expr ")"                                             -> get_expr
+    | "(" _SET expr expr ")"                                        -> set_expr
+    | "(" _BEGIN expr* ")"                                          -> begin_expr
+    | "(" _WHILE expr expr ")"                                      -> while_expr
+    | "(" expr expr* ")"                                            -> apply_expr
+    | "(" _LAMBDA "(" parameters ")" expr ")"                       -> lambda_expr
+    | "(" _ASSIGN identifier expr ")"                               -> assign_expr
+
+bindings: binding*
+binding: "(" identifier expr ")"
+
+arms: arm*
+arm: "(" expr expr ")"
+
+int: INT
+identifier: IDENTIFIER
+
+_PROGRAM.2: "program"
+
+_DEF.2: "def"
+
+_ADD.2: "+"
+_SUBTRACT.2: "-"
+_MULTIPLY.2: "*"
+_LET.2: "let"
+_LETSTAR.2: "let*"
+_LETREC.2: "letrec"
+_NOT.2: "not"
+_AND.2: "and"
+_OR.2: "or"
+_IF.2: "if"
+_COND.2: "cond"
+_ELSE.2: "else"
+_LESS_THAN_OR_EQUAL_TO.2: "<="
+_LESS_THAN.2: "<"
+_EQUAL_TO.2: "=="
+_GREATER_THAN.2: ">"
+_GREATER_THAN_OR_EQUAL_TO.2: ">="
+_CELL.2: "cell"
+_GET.2: "^"
+_SET.2: ":="
+_BEGIN.2: "begin"
+_WHILE.2: "while"
+_LAMBDA.2: "lambda" | "abs"
+_ASSIGN.2: "set!"
+
+INT.2: ("0".."9")+
+
+_TRUE.2: "#t"
+_FALSE.2: "#f"
+
+_UNIT.2: "#u"
+
+IDENTIFIER: /[^\W\d][_\-'\w]*/
+
+WS: /[ \t\f\r\n]/+
+
+%ignore WS
+

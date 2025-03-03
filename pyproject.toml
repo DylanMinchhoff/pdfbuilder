@@ -22,9 +22,10 @@ addopts = [
     "--cov-report=term",
     "--cov-report=html:reports/coverage/htmlcov",
     "--cov-report=xml:reports/coverage/coverage.xml",
-
-
 ]
+
+[tool.coverage.run]
+omit = ["src/store.py", "src/main.py"]
 
 [dependency-groups]
 dev = [

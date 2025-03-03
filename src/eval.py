@@ -1,15 +1,14 @@
-from collections.abc import Sequence, Mapping
+from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
 from functools import partial
 from typing import Union
-from kernel import (
+from glucose import (
     Program,
     Expression,
     Int,
     Add,
     Subtract,
     Multiply,
-    Let,
     Var,
     Bool,
     If,
@@ -17,13 +16,24 @@ from kernel import (
     EqualTo,
     GreaterThanOrEqualTo,
     Unit,
-    Cell,
+    Tuple,
     Get,
     Set,
-    Do,
-    While,
+    Lambda,
+    Apply,
 )
 from store import Store
+
+
+type Value = Union[
+    Int,
+    Bool,
+    Unit,
+    Location,
+    Closure,
+]
+
+type Environment = Mapping[str, Value]
 
 
 @dataclass(frozen=True)
@@ -31,55 +41,53 @@ class Location:
     value: int
 
 
-type Value = Union[Int, Bool, Unit, Location]
-
-type Environment = Mapping[str, Value]
+@dataclass(frozen=True)
+class Closure:
+    abs: Lambda[Expression]
+    env: Environment
 
 
 def eval(
     program: Program,
-    arguments: Sequence[Int],
+    arguments: Sequence[Value],
 ) -> Value:
-    return eval_expr(
+    return eval_expression(
         expr=program.body,
         env={p: a for p, a in zip(program.parameters, arguments, strict=True)},
         store=Store(),
     )
 
 
-def eval_expr(
+def eval_expression(
     expr: Expression,
     env: Environment,
     store: Store[Value],
 ) -> Value:
-    recur = partial(eval_expr, env=env, store=store)
+    recur = partial(eval_expression, env=env, store=store)
     match expr:
         case Int():
             return expr
 
-        case Add(e1, e2):
-            match recur(e1), recur(e2):
+        case Add(x, y):
+            match recur(x), recur(y):
                 case [Int(i1), Int(i2)]:
                     return Int(i1 + i2)
-                case _:  # pragma: no cover
+                case [x, y]:  # pragma: no cover
                     raise ValueError()
 
-        case Subtract(e1, e2):
-            match recur(e1), recur(e2):
+        case Subtract(x, y):
+            match recur(x), recur(y):
                 case [Int(i1), Int(i2)]:
                     return Int(i1 - i2)
-                case _:  # pragma: no cover
+                case [x, y]:  # pragma: no cover
                     raise ValueError()
 
-        case Multiply(e1, e2):
-            match recur(e1), recur(e2):
+        case Multiply(x, y):
+            match recur(x), recur(y):
                 case [Int(i1), Int(i2)]:
                     return Int(i1 * i2)
-                case _:  # pragma: no cover
+                case [x, y]:  # pragma: no cover
                     raise ValueError()
-
-        case Let(x, e1, e2):
-            return recur(e2, env={**env, x: recur(e1)})
 
         case Var(x):
             return env[x]
@@ -87,59 +95,64 @@ def eval_expr(
         case Bool():
             return expr
 
-        case If(e1, e2, e3):
-            match recur(e1):
+        case If(condition, consequent, alternative):
+            match recur(condition):
                 case Bool(True):
-                    return recur(e2)
+                    return recur(consequent)
                 case Bool(False):
-                    return recur(e3)
+                    return recur(alternative)
                 case _:  # pragma: no cover
                     raise ValueError()
 
-        case LessThan(e1, e2):
-            match recur(e1), recur(e2):
+        case LessThan(x, y):
+            match recur(x), recur(y):
                 case [Int(i1), Int(i2)]:
                     return Bool(i1 < i2)
-                case _:  # pragma: no cover
+                case [x, y]:  # pragma: no cover
                     raise ValueError()
 
-        case EqualTo(e1, e2):
-            match recur(e1), recur(e2):
+        case EqualTo(x, y):
+            match recur(x), recur(y):
                 case [Int(i1), Int(i2)]:
                     return Bool(i1 == i2)
                 case [Bool(b1), Bool(b2)]:
                     return Bool(b1 == b2)
-                case _:  # pragma: no cover
+                case [x, y]:  # pragma: no cover
                     raise ValueError()
 
-        case GreaterThanOrEqualTo(e1, e2):
-            match recur(e1), recur(e2):
+        case GreaterThanOrEqualTo(x, y):
+            match recur(x), recur(y):
                 case [Int(i1), Int(i2)]:
                     return Bool(i1 >= i2)
+                case [x, y]:  # pragma: no cover
+                    raise ValueError()
+
+        case Unit():
+            return expr
+
+        case Tuple(es):
+            base = store.malloc(1)
+            for i, e in enumerate(es):
+                store[base, i] = recur(e)
+            return Location(base)
+
+        case Get(tuple, index):
+            match recur(tuple), recur(index):
+                case [Location(base), Int(offset)]:
+                    return store[base, offset]
                 case _:  # pragma: no cover
                     raise ValueError()
 
-        case Cell(value):
-            return Location(store.next_free)
+        case Set(tuple, index, value):
+            match recur(tuple), recur(index):
+                case [Location(base), Int(offset)]:
+                    store[base, offset] = recur(value)
+                    return Unit()
+                case tuple, index:  # pragma: no cover
+                    raise ValueError()
 
-        case Get(cell):
-            return cell.value
+        case Lambda():
+            raise NotImplementedError()
 
-        case Set(cell, value):
-            Store[Cell(value)]
-            return Unit()
-
-        case Do(first, second):
-            recur(first)
-            return recur(second)
-
-        case While(condition, body):
-            while condition == Bool(True):
-                recur(body)
-            return Unit()
-
-        case Unit():
-            return Unit()
-
-        case _:  # pragma: no branch
+        case Apply(callee, arguments):  # pragma: no branch
             raise NotImplementedError()

@@ -1,12 +1,11 @@
 from functools import partial
-from kernel import (
+from glucose import (
     Program,
     Expression,
     Int,
     Add,
     Subtract,
     Multiply,
-    Let,
     Var,
     Bool,
     If,
@@ -14,11 +13,11 @@ from kernel import (
     EqualTo,
     GreaterThanOrEqualTo,
     Unit,
-    Cell,
+    Tuple,
     Get,
     Set,
-    Do,
-    While,
+    Lambda,
+    Apply,
 )
 
 
@@ -27,72 +26,64 @@ def opt(
 ) -> Program:
     return Program(
         parameters=program.parameters,
-        body=opt_expr(program.body),
+        body=opt_expression(program.body),
     )
 
 
-def opt_expr(
+def opt_expression(
     expr: Expression,
 ) -> Expression:
-    recur = partial(opt_expr)
+    recur = partial(opt_expression)
 
     # return as val, var for optimization
     match expr:
         case Int():
             return expr
 
-        case Add(e1, e2):
-            match recur(e1), recur(e2):
-                case [Int(0), e2]:
-                    return e2
-                case [e1, Int(0)]:
-                    return e1
+        case Add(x, y):
+            match recur(x), recur(y):
+                case [Int(0), y]:
+                    return y
+                case [x, Int(0)]:
+                    return x
                 case [Int(i1), Int(i2)]:
                     return Int(i1 + i2)
-                case [Int(i1), Add(Int(i2), e2)]:
-                    return Add(Int(i1 + i2), e2)
-                case [Add(Int(i1), e1), Add(Int(i2), e2)]:
-                    return Add(Int(i1 + i2), Add(e1, e2))
-                case [e1, Int() as e2]:
-                    return Add(e2, e1)
-                case [e1, e2]:  # pragma: no branch
-                    return Add(e1, e2)
+                case [Int(i1), Add(Int(i2), y)]:
+                    return Add(Int(i1 + i2), y)
+                case [Add(Int(i1), x), Add(Int(i2), y)]:
+                    return Add(Int(i1 + i2), Add(x, y))
+                case [x, Int() as y]:
+                    return Add(y, x)
+                case [x, y]:  # pragma: no branch
+                    return Add(x, y)
 
-        case Subtract(e1, e2):
-            match recur(e1), recur(e2):
+        case Subtract(x, y):
+            match recur(x), recur(y):
                 case [Int(i1), Int(i2)]:
                     return Int(i1 - i2)
-                case [e1, e2]:  # pragma: no branch
-                    return Subtract(e1, e2)
+                case [x, y]:  # pragma: no branch
+                    return Subtract(x, y)
 
-        case Multiply(e1, e2):
-            match recur(e1), recur(e2):
-                case [Int(0), e2]:
+        case Multiply(x, y):
+            match recur(x), recur(y):
+                case [Int(0), y]:
                     return Int(0)
-                case [e1, Int(0)]:
+                case [x, Int(0)]:
                     return Int(0)
-                case [Int(1), e2]:
-                    return e2
-                case [e1, Int(1)]:
-                    return e1
+                case [Int(1), y]:
+                    return y
+                case [x, Int(1)]:
+                    return x
                 case [Int(i1), Int(i2)]:
                     return Int(i1 * i2)
-                case [Int(i1), Multiply(Int(i2), e2)]:
-                    return Multiply(Int(i1 * i2), e2)
-                case [Multiply(Int(i1), e1), Multiply(Int(i2), e2)]:
-                    return Multiply(Int(i1 * i2), Multiply(e1, e2))
-                case [e1, Int() as e2]:
-                    return Multiply(e2, e1)
-                case [e1, e2]:  # pragma: no branch
-                    # bring var to right and value to left [val, var]
-                    return Multiply(e1, e2)
-
-        case Let(x, e1, e2):
-            match recur(e2):
-                case Var(y) if x == y:
-                    return recur(e1)
-                case e2:  # pragma: no branch
-                    return Let(x, recur(e1), e2)
+                case [Int(i1), Multiply(Int(i2), y)]:
+                    return Multiply(Int(i1 * i2), y)
+                case [Multiply(Int(i1), x), Multiply(Int(i2), y)]:
+                    return Multiply(Int(i1 * i2), Multiply(x, y))
+                case [x, Int() as y]:
+                    return Multiply(y, x)
+                case [x, y]:  # pragma: no branch
+                    return Multiply(x, y)
 
         case Var():
             return expr
@@ -100,61 +91,56 @@ def opt_expr(
         case Bool():
             return expr
 
-        case If(e1, e2, e3):
-            match recur(e1):
+        case If(condition, consequent, alternative):
+            match recur(condition):
                 case Bool(True):
-                    return recur(e2)
+                    return recur(consequent)
                 case Bool(False):
-                    return recur(e3)
-                case e1:  # pragma: no branch
-                    return If(e1, recur(e2), recur(e3))
+                    return recur(alternative)
+                case condition:  # pragma: no branch
+                    return If(condition, recur(consequent), recur(alternative))
 
-        case LessThan(e1, e2):
-            match recur(e1), recur(e2):
+        case LessThan(x, y):
+            match recur(x), recur(y):
                 case [Int(i1), Int(i2)]:
                     return Bool(i1 < i2)
-                case [e1, e2]:  # pragma: no branch
-                    return LessThan(e1, e2)
+                case [x, y]:  # pragma: no branch
+                    return LessThan(x, y)
 
-        case EqualTo(e1, e2):
-            match recur(e1), recur(e2):
+        case EqualTo(x, y):
+            match recur(x), recur(y):
                 case [Int(i1), Int(i2)]:
                     return Bool(i1 == i2)
                 case [Bool(b1), Bool(b2)]:
                     return Bool(b1 == b2)
-                case [e1, e2]:  # pragma: no branch
-                    return EqualTo(e1, e2)
+                case [x, y]:  # pragma: no branch
+                    return EqualTo(x, y)
 
-        case GreaterThanOrEqualTo(e1, e2):
-            match recur(e1), recur(e2):
+        case GreaterThanOrEqualTo(x, y):
+            match recur(x), recur(y):
                 case [Int(i1), Int(i2)]:
                     return Bool(i1 >= i2)
-                case [e1, e2]:  # pragma: no branch
-                    return GreaterThanOrEqualTo(e1, e2)
+                case [x, y]:  # pragma: no branch
+                    return GreaterThanOrEqualTo(x, y)
 
         case Unit():
-            return Unit()
+            return expr
 
-        case Cell(value):
-            return Cell(value)
+        case Tuple(components):
+            return Tuple([recur(e) for e in components])
 
-        case Get(ex):
-            if recur(ex) == Cell(Unit()):
-                return Unit()
-            else:
-                return Get(ex)
+        case Get(tuple, index):
+            match recur(tuple), recur(index):
+                case [Tuple(components), Int(i)] if i in range(len(components)):
+                    return components[i]
+                case [tuple, index]:  # pragma: no branch
+                    return Get(tuple, index)
 
-        case Set(cell, value):
-            return Set(cell, value)
+        case Set(tuple, index, value):
+            return Set(recur(tuple), index, recur(value))
 
-        case Do(a, b):
-            return Do(a, b)
+        case Lambda(parameters, body):
+            return Lambda(parameters, recur(body))
 
-        case While(cond, body):
-            if recur(cond) == Bool(False):
-                return Unit()
-            else:
-                return While(cond, body)
-
-        case _:  # pragma: branch
-            raise NotImplementedError()
+        case Apply(callee, arguments):  # pragma no branch
+            return Apply(recur(callee), [recur(e) for e in arguments])
